@@ -1,0 +1,35 @@
+name: Hexo Deploy
+
+on:
+  push:
+    branches:
+      - main # 当推送到 main 分支时触发
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # 允许 actions 向仓库写入（用于推送到 gh-pages 分支）
+
+    steps:
+      - name: Checkout 代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # 👈 重要：改成你本地用的 Node.js 版本（例如 '18' 或 '20'）
+
+      - name: 安装依赖
+        run: npm install
+
+      - name: 生成静态文件
+        run: npm run build # 如果你的 package.json 中没有 "build" 脚本，请改成 npx hexo generate
+
+      - name: 部署到 GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages # 静态文件将推送到 gh-pages 分支
